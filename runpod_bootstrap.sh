@@ -3,6 +3,17 @@
 # Installs ComfyUI, downloads models, starts server
 set -euo pipefail
 
+# Detect if we're on a barebones image and install deps
+if ! command -v curl >/dev/null 2>&1 || \
+   ! command -v git >/dev/null 2>&1 || \
+   ! command -v python3 >/dev/null 2>&1; then
+  echo "=== Installing system deps (vanilla image detected) ==="
+  apt-get update -qq
+  apt-get install -y --no-install-recommends \
+    curl wget git python3 python3-pip python3-venv \
+    ca-certificates build-essential
+fi
+
 WORKSPACE="/workspace"
 COMFYUI_DIR="$WORKSPACE/ComfyUI"
 MODELS_DIR="$COMFYUI_DIR/models"
