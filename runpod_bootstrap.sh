@@ -84,7 +84,43 @@ if [ ! -f "$CLIP_T5_PATH" ]; then
         "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors"
 fi
 
+# Wan 2.2 TI2V-5B (Phase 0.5b — image-to-video). Files come from the
+# Comfy-Org repackaging which matches ComfyUI's expected directory layout
+# (NOT the upstream Wan-AI org repo). Different paths than Flux:
+#   diffusion_models/  vs Flux's unet/
+#   text_encoders/     vs Flux's clip/
+WAN_UNET_PATH="$MODELS_DIR/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors"
+WAN_VAE_PATH="$MODELS_DIR/vae/wan2.2_vae.safetensors"
+WAN_T5_PATH="$MODELS_DIR/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+
+mkdir -p "$MODELS_DIR"/{diffusion_models,text_encoders}
+
+if [ ! -f "$WAN_UNET_PATH" ]; then
+    echo "Downloading Wan 2.2 TI2V-5B UNET (~10 GB)..."
+    wget -q --show-progress -O "$WAN_UNET_PATH" \
+        "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors" \
+        --header="Authorization: Bearer ${HF_TOKEN:-}"
+fi
+
+if [ ! -f "$WAN_VAE_PATH" ]; then
+    echo "Downloading Wan 2.2 VAE (~300 MB)..."
+    wget -q --show-progress -O "$WAN_VAE_PATH" \
+        "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan2.2_vae.safetensors" \
+        --header="Authorization: Bearer ${HF_TOKEN:-}"
+fi
+
+if [ ! -f "$WAN_T5_PATH" ]; then
+    echo "Downloading umT5-XXL text encoder (~5-7 GB)..."
+    wget -q --show-progress -O "$WAN_T5_PATH" \
+        "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors" \
+        --header="Authorization: Bearer ${HF_TOKEN:-}"
+fi
+
 echo "All models ready."
+
+# Disk usage sanity — should be well under 60 GB used, >20 GB free
+echo "=== Volume usage after model downloads ==="
+df -h /workspace
 
 # Start ComfyUI
 echo "Starting ComfyUI on 0.0.0.0:8188..."
