@@ -84,9 +84,6 @@ if [ ! -f "$CLIP_T5_PATH" ]; then
         "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors"
 fi
 
-# Symlink UNET as checkpoint for workflows that use CheckpointLoaderSimple
-ln -sf "$UNET_PATH" "$MODELS_DIR/checkpoints/flux1-dev.safetensors"
-
 echo "All models ready."
 
 # Start ComfyUI
